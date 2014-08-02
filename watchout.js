@@ -37,6 +37,7 @@ var circles = svgContainer.selectAll("circle")
                           .attr("cx", function (d) { return d.x; })
                           .attr("cy", function (d) { return d.y; })
                           .attr("r", function (d) { return d.r; })
+                          .attr("class", "enemies")
                           .style("fill", function (d) { return d.color; });
 
 var player = svgContainer.append("circle")
@@ -55,5 +56,44 @@ var move = function(){
          .attr("cy", function () { return Math.random()*600; });
 
 };
+
 setInterval(function(){move();}, 2000);
+
+
+//checks distance between enemy and player
+var distanceBetween = function(enemy){
+  var a = player.attr("cx") - enemy.attr("cx");
+  var b = player.attr("cy") - enemy.attr("cy");
+  var c = Math.sqrt(a*a + b*b);
+  return c;
+};
+
+//collision detected, return true or false
+var detectCollision = function(){
+  d3.selectAll(".enemies")
+  .each( function(d, i){
+    if (distanceBetween( d3.select(this)) < 20) {
+      console.log("Collision Detected");
+    }
+  });
+};
+
+setInterval(detectCollision, 10);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
