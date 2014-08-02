@@ -49,36 +49,59 @@ var player = svgContainer.append("circle")
 
 
 
-var move = function(){
-  circles.transition()
+var move = function(elements){
+  elements.transition()
          .duration(2000)
          .attr("cx", function () { return Math.random()*600; })
-         .attr("cy", function () { return Math.random()*600; });
+         .attr("cy", function () { return Math.random()*600; })
+         .each("end", function(){ move(d3.select(this)); });
 
 };
+move(circles);
 
-setInterval(function(){move();}, 2000);
-
-
-//checks distance between enemy and player
-var distanceBetween = function(enemy){
-  var a = player.attr("cx") - enemy.attr("cx");
-  var b = player.attr("cy") - enemy.attr("cy");
-  var c = Math.sqrt(a*a + b*b);
-  return c;
+//scoreboard
+var score = 0;
+var bestScore = 0;
+var scoreTicker = function(){
+  score = score+1;
+  bestScore = Math.max(score, bestScore);
+  d3.select(".scoreboard .high span").text(bestScore);
+  d3.select(".scoreboard .current span").text(score);
 };
+setInterval(scoreTicker, 250);
 
-//collision detected, return true or false
+
+
+//set collision count and prevCollision
+var prevCollision = false;
+var collisionCount = 0;
+//collision detected
 var detectCollision = function(){
-  d3.selectAll(".enemies")
-  .each( function(d, i){
-    if (distanceBetween( d3.select(this)) < 20) {
-      console.log("Collision Detected");
+  var collision = false;
+
+  circles.each( function(){
+    var enemy = d3.select(this);
+    var a = player.attr("cx") - enemy.attr("cx");
+    var b = player.attr("cy") - enemy.attr("cy");
+    var c = Math.sqrt(a*a + b*b);
+    if( c < 20){
+      collision = true;
     }
   });
+
+  if(collision){
+    if(prevCollision !== collision){
+      collisionCount = collisionCount+1;
+      d3.select(".scoreboard .collisions span").text(collisionCount);
+      score = 0;
+    }
+  }
+
+  prevCollision = collision;
+
 };
 
-setInterval(detectCollision, 10);
+d3.timer(detectCollision);
 
 
 
